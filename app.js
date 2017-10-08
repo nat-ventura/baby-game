@@ -22,32 +22,55 @@ console.log('server started 2k');
 const SOCKET_LIST = {};
 const PLAYER_LIST = {};
 
-// player 
-var Player = (id) => {
+// entity
+var Entity = () => {
   var self = {
     x:250,
     y:250,
-    id:id,
-    number: String(Math.floor(10 * Math.random())),
-    pressingRight:false,
-    pressingLeft:false,
-    pressingUp:false,
-    pressingDown:false,
-    maxSpd:10
+    spdX:0,
+    spdY:0,
+    id:''
+  }
+  self.update = () => {
+    self.updatePosition();
+  }
+  self.updatePosition = () => {
+    self.x += self.spdX;
+    self.y += self.spdY;
+  }
+  return self;
+} 
+
+// player 
+var Player = (id) => {
+  var self = Entity ();
+  self.id = id;
+  self.number = String(Math.floor(10 * Math.random()));
+  self.pressingRight = false;
+  self.pressingLeft = false;
+  self.pressingUp = false;
+  self.pressingDown = false;
+  self.maxSpeed = 10;
+  
+  var super_update = self.update;
+  
+  self.update = () => {
+    self.updateSpeed();
+    super_update();
   }
 
-  self.updatePosition = () => {
+  self.updateSpeed = () => {
     if (self.pressingRight) {
-      self.x += self.maxSpd;
+      self.speedX += self.maxSpeed;
     }
     if (self.pressingLeft) {
-      self.x -= self.maxSpd;
+      self.speedX -= self.maxSpeed;
     } 
     if (self.pressingUp) {
-      self.y -= self.maxSpd;
+      self.speedY -= self.maxSpeed;
     }
     if (self.pressingDown) {
-      self.y += self.maxSpd;
+      self.speedY += self.maxSpeed;
     }
   }
   return self;
