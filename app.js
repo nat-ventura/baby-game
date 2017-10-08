@@ -16,6 +16,13 @@ app.get('/', (req, res) => {
 app.use('/client', express.static(__dirname + '/client'));
 
 serv.listen(2000);
+console.log('server started 2k');
+
+// function will be called if player connects to server
+var io = require('socket.io')(serv,{});
+io.sockets.on('connection', socket => {
+  console.log('socket connection');
+});
 
 // view engine setup
 // app.set('views', path.join(__dirname, 'views'));
