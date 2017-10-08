@@ -124,7 +124,16 @@ io.sockets.on('connection', socket => {
   socket.id = Math.random();
   SOCKET_LIST[socket.id] = socket;
 
-  Player.onConnect(socket);
+  socket.on('signIn', (data) => {
+    if (data.username === 'bob' && data.password === 'asd') {
+      Player.onConnect(socket);
+      socket.emit('signInResponse', {success:true});
+    } else {
+      socket.emit('signInResponse', {success:false});
+    }
+  });
+
+
 
   socket.x = 0;
   socket.y = 0;
