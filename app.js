@@ -18,19 +18,30 @@ app.use('/client', express.static(__dirname + '/client'));
 serv.listen(2000);
 console.log('server started 2k');
 
+// socket object
+const SOCKET_LIST = {};
+
 // function will be called if player connects to server
 var io = require('socket.io')(serv,{});
 io.sockets.on('connection', socket => {
-  console.log('socket connection');
-
-  socket.on('happy', (data) => {
-    console.log('happy because', data.reason);
-  });
-
-  socket.emit('serverMessage', {
-    message: 'hi i\'m your server friend'
-  });
+  socket.id = Math.random();
+  socket.x = 0;
+  socket.y = 0;
+  SOCKET_LIST[socket.id] = socket;
 });
+
+// location
+setInterval( () => {
+  for (var i in SOCKET_LIST) {
+    var socket = SOCKET_LIST[i];
+      socket.x++;
+      socket.y++;
+      socket.emit('newPosition', {
+        x:socket.x,
+        y:socket.y
+      })
+  }
+}, 1000/25);
 
 // view engine setup
 // app.set('views', path.join(__dirname, 'views'));
