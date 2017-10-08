@@ -20,26 +20,25 @@ console.log('server started 2k');
 
 // socket object
 const SOCKET_LIST = {};
-const PLAYER_LIST = {};
 
 // entity
 var Entity = () => {
   var self = {
-    x:250,
-    y:250,
-    spdX:0,
-    spdY:0,
-    id:''
+    x: 250,
+    y: 250,
+    speedX: 0,
+    speedY: 0,
+    id: ''
   }
   self.update = () => {
     self.updatePosition();
   }
   self.updatePosition = () => {
-    self.x += self.spdX;
-    self.y += self.spdY;
+    self.x += self.speedX;
+    self.y += self.speedY;
   }
   return self;
-} 
+}
 
 // player 
 var Player = (id) => {
@@ -50,7 +49,7 @@ var Player = (id) => {
   self.pressingLeft = false;
   self.pressingUp = false;
   self.pressingDown = false;
-  self.maxSpeed = 10;
+  self.maxSpeed = 5;
   
   var super_update = self.update;
   
@@ -63,17 +62,59 @@ var Player = (id) => {
     if (self.pressingRight) {
       self.speedX += self.maxSpeed;
     }
-    if (self.pressingLeft) {
+    else if (self.pressingLeft) {
       self.speedX -= self.maxSpeed;
-    } 
+    } else {
+      self.speedX = 0;
+    }
+
     if (self.pressingUp) {
       self.speedY -= self.maxSpeed;
     }
-    if (self.pressingDown) {
+    else if (self.pressingDown) {
       self.speedY += self.maxSpeed;
+    } else {
+      self.speedY = 0;
     }
   }
+  Player.list[id] = self;
   return self;
+}
+
+Player.list = {};
+
+Player.onConnect = (socket) => {
+  var player = Player(socket.id);
+  //receives keyPress directions from socket 
+  socket.on('keyPress', (data) => {
+      if (data.inputId === 'left') {
+        player.pressingLeft = data.state;
+      } else if (data.inputId === 'right') {
+        player.pressingRight = data.state;
+      } else if (data.inputId === 'up') {
+        player.pressingUp = data.state;
+      } else if (data.inputId === 'down') {
+        player.pressingDown = data.state;
+      }
+    });
+}
+
+Player.onDisconnect = (socket) => {
+  delete Player.list[socket.id];
+}
+
+Player.update = () => {
+  var package = [];
+  for (var i in Player.list) {
+    var player = Player.list[i];
+      player.update();
+      package.push({
+        x:player.x,
+        y:player.y,
+        number:player.number
+      });
+  }
+  return package;
 }
 
 
@@ -81,49 +122,37 @@ var Player = (id) => {
 var io = require('socket.io')(serv,{});
 io.sockets.on('connection', socket => {
   socket.id = Math.random();
+  SOCKET_LIST[socket.id] = socket;
 
-  var player = Player(socket.id);
-  PLAYER_LIST[socket.id] = player;
+  Player.onConnect(socket);
 
   socket.x = 0;
   socket.y = 0;
-  socket.number = '' + Math.floor(10 * Math.random());
-  SOCKET_LIST[socket.id] = socket;
+  socket.number = String(Math.floor(10 * Math.random()));
+  
 
   socket.on('disconnect', () => {
     delete SOCKET_LIST[socket.id];
-    delete PLAYER_LIST[socket.id];
+    Player.onDisconnect(socket);
   });
 
-  //receives keyPress directions from socket 
-  socket.on('keyPress', (data) => {
-    if (data.inputId === 'left') {
-      player.pressingLeft = data.state;
-    } else if (data.inputId === 'right') {
-      player.pressingRight = data.state;
-    } else if (data.inputId === 'up') {
-      player.pressingUp = data.state;
-    } else if (data.inputId === 'down') {
-      player.pressingDown = data.state;
+  socket.on('sendMessageToServer', (data) => {
+    var playerName = ('' + socket.id).slice(2,7);
+    for (var i in SOCKET_LIST) {
+      SOCKET_LIST[i].emit('addToChat', playerName + ': ' + data);
+      console.log("i'm the socket list index", SOCKET_LIST[i])
     }
   });
+
 });
 
 // location
 setInterval( () => {
-  var playerPackage = [];
-  for (var i in PLAYER_LIST) {
-    var player = PLAYER_LIST[i];
-      player.updatePosition();
-      playerPackage.push({
-        x:player.x,
-        y:player.y,
-        number:player.number
-      });
-  }
+  var package = Player.update();
+  
   for (var i in SOCKET_LIST) {
     var socket = SOCKET_LIST[i];
-    socket.emit('newPositions', playerPackage);
+    socket.emit('newPositions', package);
   }
 
 }, 1000/25);

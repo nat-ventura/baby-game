@@ -1,8 +1,18 @@
 <canvas id='ctx' width='500' height='500' style='border:1px solid #000'></canvas>
 
-<script src='https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js'></script>
+<div id='chat-text' style='width:500px;height:100px;overflow-y:scroll'>
+    <div>Hello!</div>
+</div>
 
+<form id="chat-form">
+    <input id="chat-input" type="text" style="width:500px"></input>
+</form>
+
+<script src='https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js'></script>
 <script>
+    var chatText = document.getElementById('chat-text');
+    var chatInput = document.getElementById('chat-input');
+    var chatForm = document.getElementById('chat-form');
     var ctx = document.getElementById('ctx').getContext('2d');
     ctx.font = '30px Arial';
 
@@ -14,6 +24,16 @@
             ctx.fillText(data[i].number, data[i].x, data[i].y);
         }
     });
+
+    socket.on('addToChat', (data) => {
+        chatText.innerHTML += '<div>' + data + '</div>';
+    });
+
+    chatForm.onsubmit = (event) => {
+        event.preventDefault();
+        socket.emit('sendMessageToServer', chatInput.value);
+        chatInput.value = '';
+    }
 
     document.onkeydown = (event) => {
         // d key 
