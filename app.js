@@ -27,7 +27,12 @@ io.sockets.on('connection', socket => {
   socket.id = Math.random();
   socket.x = 0;
   socket.y = 0;
+  socket.number = '' + Math.floor(10 * Math.random());
   SOCKET_LIST[socket.id] = socket;
+
+  socket.on('disconnect', () => {
+    delete SOCKET_LIST[socket.id];
+  });
 });
 
 // location
@@ -39,7 +44,8 @@ setInterval( () => {
       socket.y++;
       playerPackage.push({
         x:socket.x,
-        y:socket.y
+        y:socket.y,
+        number:socket.number
       });
   }
   for (var i in SOCKET_LIST) {
