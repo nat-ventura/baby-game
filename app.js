@@ -5,7 +5,8 @@ var app = express();
 // var logger = require('morgan');
 // var cookieParser = require('cookie-parser');
 // var bodyParser = require('body-parser');
-var serv = require('http').Server(app);
+const serv = require('http').Server(app);
+require('dotenv').config();
 
 // var index = require('./routes/index');
 // var users = require('./routes/users');
@@ -117,6 +118,19 @@ Player.update = () => {
   return package;
 }
 
+var USERS = {
+  'bob': 'asd'
+}
+
+var isValidPassword = (data) => {
+  return USERS[data.username] === data.password;
+}
+var isUsernameTaken = (data) => {
+  return USERS[data.username];
+}
+var addUser = (data) => {
+  USERS[data.username] = data.password;
+}
 
 // function will be called if player connects to server
 var io = require('socket.io')(serv,{});
@@ -125,20 +139,25 @@ io.sockets.on('connection', socket => {
   SOCKET_LIST[socket.id] = socket;
 
   socket.on('signIn', (data) => {
-    if (data.username === 'bob' && data.password === 'asd') {
+    if (isValidPassword(data)) {
       Player.onConnect(socket);
       socket.emit('signInResponse', {success:true});
     } else {
       socket.emit('signInResponse', {success:false});
     }
   });
-
-
+  socket.on('signUp', (data) => {
+    if (isUsernameTaken(data)) {
+      socket.emit('signUpResponse', {success:false});
+    } else {
+      addUser(data);
+      socket.emit('signUpResponse', {success:true});
+    }
+  });
 
   socket.x = 0;
   socket.y = 0;
   socket.number = String(Math.floor(10 * Math.random()));
-  
 
   socket.on('disconnect', () => {
     delete SOCKET_LIST[socket.id];
