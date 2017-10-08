@@ -1,6 +1,7 @@
+// socket io
 var socket = io();
 
-// sign
+// sign in
 var signDiv = document.getElementById('signDiv');
 var signDivUsername = document.getElementById('signDiv-username');
 var signDivSignIn = document.getElementById('signDiv-signIn');
@@ -13,6 +14,8 @@ signDivSignIn.onclick = () => {
 signDivSignUp.onclick = () => {
     socket.emit('signUp', {username:signDivUsername.value, password:signDivPassword.value});
 }
+
+// sign in
 socket.on('signInResponse', (data) => {
     if (data.success) {
         signDiv.style.display = 'none';
@@ -21,6 +24,8 @@ socket.on('signInResponse', (data) => {
         alert ('sign in unsuccessful');
     }
 });
+
+// sign up 
 socket.on('signUpresponse', (data) => {
     if (data.success) {
         alert('sign up successful');

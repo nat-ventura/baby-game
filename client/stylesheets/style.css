@@ -6,3 +6,17 @@ body {
 a {
   color: #00B7FF;
 }
+
+#gameDiv {
+  display: none;
+}
+
+#chat-text {
+  width: 500px;
+  height: 100px;
+  overflow-y: scroll;
+}
+
+#chat-form input {
+  width: 500px;
+}

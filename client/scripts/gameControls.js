@@ -1,12 +1,29 @@
-// game
-var chatText = document.getElementById('chat-text');
-var chatInput = document.getElementById('chat-input');
-var chatForm = document.getElementById('chat-form');
+// canvas settings 
 var ctx = document.getElementById('ctx').getContext('2d');
 ctx.font = '30px Arial';
 
 
+// chatbox
+var chatText = document.getElementById('chat-text');
+var chatInput = document.getElementById('chat-input');
+var chatForm = document.getElementById('chat-form');
 
+
+// when a player hits enter on chat, sends message to server
+chatForm.onsubmit = (event) => {
+    event.preventDefault();
+    socket.emit('sendMessageToServer', chatInput.value);
+    chatInput.value = '';
+}
+
+
+// prints text to dom after server says to add to chat
+socket.on('addToChat', (data) => {
+    chatText.innerHTML += '<div>' + data + '</div>';
+});
+
+
+// receives player positions and renders to dom
 socket.on('newPositions', (data) => {
     ctx.clearRect(0,0,500,500);
     for (var i = 0; i < data.length; i++) {
@@ -14,16 +31,8 @@ socket.on('newPositions', (data) => {
     }
 });
 
-socket.on('addToChat', (data) => {
-    chatText.innerHTML += '<div>' + data + '</div>';
-});
 
-chatForm.onsubmit = (event) => {
-    event.preventDefault();
-    socket.emit('sendMessageToServer', chatInput.value);
-    chatInput.value = '';
-}
-
+// directional keypress sends socket message 
 document.onkeydown = (event) => {
     // d key 
     if (event.keyCode === 68) {
@@ -39,7 +48,6 @@ document.onkeydown = (event) => {
         socket.emit('keyPress', {inputId:'up', state:true});
     }
 }
-
 document.onkeyup = (event) => {
     // d key 
     if (event.keyCode === 68) {
