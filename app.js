@@ -22,6 +22,10 @@ console.log('server started 2k');
 var io = require('socket.io')(serv,{});
 io.sockets.on('connection', socket => {
   console.log('socket connection');
+
+  socket.on('happy', () => {
+    console.log('happy');
+  });
 });
 
 // view engine setup
