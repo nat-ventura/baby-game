@@ -23,8 +23,12 @@ var io = require('socket.io')(serv,{});
 io.sockets.on('connection', socket => {
   console.log('socket connection');
 
-  socket.on('happy', () => {
-    console.log('happy');
+  socket.on('happy', (data) => {
+    console.log('happy because', data.reason);
+  });
+
+  socket.emit('serverMessage', {
+    message: 'hi i\'m your server friend'
   });
 });
 

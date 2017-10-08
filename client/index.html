@@ -1,8 +1,15 @@
 hello nerds
 
 <script src='https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js'></script>
+
 <script>
     var socket = io();
-    socket.emit('happy');
-
+    socket.emit('happy', {
+        reason: 'its my birthday'
+    });
+    socket.on('serverMessage', (data) => {
+        console.log(data.message);
+    })
 </script>
+
+<!-- <script src='/javascripts/sockies.js'></script> -->
