@@ -1,6 +1,6 @@
 var express = require('express');
 var app = express();
-// var path = require('path');
+var path = require('path');
 // var favicon = require('serve-favicon');
 // var logger = require('morgan');
 // var cookieParser = require('cookie-parser');
@@ -14,7 +14,7 @@ require('dotenv').config();
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/client/index.html');
 });
-app.use('/client', express.static(__dirname + '/client'));
+app.use(express.static(path.join(__dirname, 'client')));
 
 serv.listen(2000);
 console.log('server started 2k');

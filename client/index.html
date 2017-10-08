@@ -1,111 +1,33 @@
-<div id='signDiv'>
-    <p>username: <input id='signDiv-username' type='text'></input></p>
-    <p>password: <input id='signDiv-password' type='password'></p></input></p>
-    <button id='signDiv-signIn'>sign in</button>
-    <button id='signDiv-signUp'>sign up</button>
-</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
 
-<div id='gameDiv' style='display:none'>
-    <canvas id='ctx' width='500' height='500' style='border:1px solid #000'></canvas>
-
-    <div id='chat-text' style='width:500px;height:100px;overflow-y:scroll'>
-        <div>Hello!</div>
+    <div id='signDiv'>
+        <p>username: <input id='signDiv-username' type='text'></input></p>
+        <p>password: <input id='signDiv-password' type='password'></p></input></p>
+        <button id='signDiv-signIn'>sign in</button>
+        <button id='signDiv-signUp'>sign up</button>
+    </div>
+        
+    <div id='gameDiv' style='display:none'>
+        <canvas id='ctx' width='500' height='500' style='border:1px solid #000'></canvas>
+        <div id='chat-text' style='width:500px;height:100px;overflow-y:scroll'>
+            <div>Hello!</div>
+        </div>
+    
+        <form id="chat-form">
+            <input id="chat-input" type="text" style="width:500px"></input>
+        </form>
     </div>
 
-    <form id="chat-form">
-        <input id="chat-input" type="text" style="width:500px"></input>
-    </form>
-</div>
-
-<script src='https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js'></script>
-<script>
-    var socket = io();
-
-    // sign
-    var signDiv = document.getElementById('signDiv');
-    var signDivUsername = document.getElementById('signDiv-username');
-    var signDivSignIn = document.getElementById('signDiv-signIn');
-    var signDivSignUp = document.getElementById('signDiv-signUp');
-    var signDivPassword = document.getElementById('signDiv-password');
-
-    signDivSignIn.onclick = () => {
-        socket.emit('signIn', {username:signDivUsername.value, password:signDivPassword.value});
-    }
-    signDivSignUp.onclick = () => {
-        socket.emit('signUp', {username:signDivUsername.value, password:signDivPassword.value});
-    }
-    socket.on('signInResponse', (data) => {
-        if (data.success) {
-            signDiv.style.display = 'none';
-            gameDiv.style.display = 'inline-block';
-        } else {
-            alert ('sign in unsuccessful');
-        }
-    });
-    socket.on('signUpresponse', (data) => {
-        if (data.success) {
-            alert('sign up successful');
-        } else {
-            alert('sign up unsuccessful');
-        }
-    });
-
-    // game
-    var chatText = document.getElementById('chat-text');
-    var chatInput = document.getElementById('chat-input');
-    var chatForm = document.getElementById('chat-form');
-    var ctx = document.getElementById('ctx').getContext('2d');
-    ctx.font = '30px Arial';
-
-    
-
-    socket.on('newPositions', (data) => {
-        ctx.clearRect(0,0,500,500);
-        for (var i = 0; i < data.length; i++) {
-            ctx.fillText(data[i].number, data[i].x, data[i].y);
-        }
-    });
-
-    socket.on('addToChat', (data) => {
-        chatText.innerHTML += '<div>' + data + '</div>';
-    });
-
-    chatForm.onsubmit = (event) => {
-        event.preventDefault();
-        socket.emit('sendMessageToServer', chatInput.value);
-        chatInput.value = '';
-    }
-
-    document.onkeydown = (event) => {
-        // d key 
-        if (event.keyCode === 68) {
-            socket.emit('keyPress', {inputId:'right', state:true});
-        // s key 
-        } else if (event.keyCode === 83) {
-            socket.emit('keyPress', {inputId:'down', state:true});
-        // a key
-        } else if (event.keyCode === 65) {
-            socket.emit('keyPress', {inputId:'left', state:true});
-        // w key
-        } else if (event.keyCode === 87) {
-            socket.emit('keyPress', {inputId:'up', state:true});
-        }
-    }
-
-    document.onkeyup = (event) => {
-        // d key 
-        if (event.keyCode === 68) {
-            socket.emit('keyPress', {inputId:'right', state:false});
-        // s key 
-        } else if (event.keyCode === 83) {
-            socket.emit('keyPress', {inputId:'down', state:false});
-        // a key
-        } else if (event.keyCode === 65) {
-            socket.emit('keyPress', {inputId:'left', state:false});
-        // w key
-        } else if (event.keyCode === 87) {
-            socket.emit('keyPress', {inputId:'up', state:false});
-        }
-    }
-
-</script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js'></script>
+    <script src='scripts/signIn.js'></script>
+    <script src='scripts/gameControls.js'></script>
+</body>
+</html>
