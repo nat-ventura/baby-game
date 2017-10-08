@@ -32,15 +32,20 @@ io.sockets.on('connection', socket => {
 
 // location
 setInterval( () => {
+  var playerPackage = [];
   for (var i in SOCKET_LIST) {
     var socket = SOCKET_LIST[i];
       socket.x++;
       socket.y++;
-      socket.emit('newPosition', {
+      playerPackage.push({
         x:socket.x,
         y:socket.y
-      })
+      });
   }
+  for (var i in SOCKET_LIST) {
+    socket.emit('newPositions', playerPackage);
+  }
+
 }, 1000/25);
 
 // view engine setup
