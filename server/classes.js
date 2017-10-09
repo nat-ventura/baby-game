@@ -16,9 +16,9 @@ var Entity = () => {
     }
     return self;
   }
-
+  
   // player 
-var Player = (id) => {
+  var Player = (id) => {
     var self = Entity ();
     self.id = id;
     self.number = String(Math.floor(10 * Math.random()));
@@ -27,13 +27,13 @@ var Player = (id) => {
     self.pressingUp = false;
     self.pressingDown = false;
     self.maxSpeed = 5;
-
+  
     var super_update = self.update;
-
+  
     self.update = () => {
         self.updateSpeed();
         super_update();
-}
+  }
     self.updateSpeed = () => {
         if (self.pressingRight) {
             self.speedX += self.maxSpeed;
@@ -43,7 +43,7 @@ var Player = (id) => {
         } else {
             self.speedX = 0;
         }
-
+  
         if (self.pressingUp) {
             self.speedY -= self.maxSpeed;
         }
@@ -55,4 +55,42 @@ var Player = (id) => {
     }
     Player.obj[id] = self;
     return self;
-}
+  }
+  
+  Player.onConnect = (socket) => {
+    var player = Player(socket.id);
+    //receives keyPress directions from socket 
+    socket.on('keyPress', (data) => {
+        if (data.inputId === 'left') {
+          player.pressingLeft = data.state;
+        } else if (data.inputId === 'right') {
+          player.pressingRight = data.state;
+        } else if (data.inputId === 'up') {
+          player.pressingUp = data.state;
+        } else if (data.inputId === 'down') {
+          player.pressingDown = data.state;
+        }
+      });
+  }
+  
+  Player.onDisconnect = (socket) => {
+    delete Player.obj[socket.id];
+  }
+  
+  Player.update = () => {
+    var package = [];
+    for (var i in Player.obj) {
+      var player = Player.obj[i];
+        player.update();
+        package.push({
+          x:player.x,
+          y:player.y,
+          number:player.number
+        });
+    }
+    return package;
+  }
+  
+  Player.obj = {};
+  
+module.exports = Player;
