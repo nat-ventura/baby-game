@@ -6,6 +6,8 @@ var path = require('path');
 // var cookieParser = require('cookie-parser');
 // var bodyParser = require('body-parser');
 const serv = require('http').Server(app);
+var classes = require('classes');
+var controls = require('playerControls');
 require('dotenv').config();
 
 // var index = require('./routes/index');
@@ -20,123 +22,20 @@ serv.listen(2000);
 console.log('server started 2k');
 
 // socket object
-const SOCKET_LIST = {};
+const SOCKET_OBJ = {};
 
-// entity
-var Entity = () => {
-  var self = {
-    x: 250,
-    y: 250,
-    speedX: 0,
-    speedY: 0,
-    id: ''
-  }
-  self.update = () => {
-    self.updatePosition();
-  }
-  self.updatePosition = () => {
-    self.x += self.speedX;
-    self.y += self.speedY;
-  }
-  return self;
-}
+Player.obj = {};
 
-// player 
-var Player = (id) => {
-  var self = Entity ();
-  self.id = id;
-  self.number = String(Math.floor(10 * Math.random()));
-  self.pressingRight = false;
-  self.pressingLeft = false;
-  self.pressingUp = false;
-  self.pressingDown = false;
-  self.maxSpeed = 5;
-  
-  var super_update = self.update;
-  
-  self.update = () => {
-    self.updateSpeed();
-    super_update();
-  }
-
-  self.updateSpeed = () => {
-    if (self.pressingRight) {
-      self.speedX += self.maxSpeed;
-    }
-    else if (self.pressingLeft) {
-      self.speedX -= self.maxSpeed;
-    } else {
-      self.speedX = 0;
-    }
-
-    if (self.pressingUp) {
-      self.speedY -= self.maxSpeed;
-    }
-    else if (self.pressingDown) {
-      self.speedY += self.maxSpeed;
-    } else {
-      self.speedY = 0;
-    }
-  }
-  Player.list[id] = self;
-  return self;
-}
-
-Player.list = {};
-
-Player.onConnect = (socket) => {
-  var player = Player(socket.id);
-  //receives keyPress directions from socket 
-  socket.on('keyPress', (data) => {
-      if (data.inputId === 'left') {
-        player.pressingLeft = data.state;
-      } else if (data.inputId === 'right') {
-        player.pressingRight = data.state;
-      } else if (data.inputId === 'up') {
-        player.pressingUp = data.state;
-      } else if (data.inputId === 'down') {
-        player.pressingDown = data.state;
-      }
-    });
-}
-
-Player.onDisconnect = (socket) => {
-  delete Player.list[socket.id];
-}
-
-Player.update = () => {
-  var package = [];
-  for (var i in Player.list) {
-    var player = Player.list[i];
-      player.update();
-      package.push({
-        x:player.x,
-        y:player.y,
-        number:player.number
-      });
-  }
-  return package;
-}
-
+// temp users object
 var USERS = {
   'bob': 'asd'
-}
-
-var isValidPassword = (data) => {
-  return USERS[data.username] === data.password;
-}
-var isUsernameTaken = (data) => {
-  return USERS[data.username];
-}
-var addUser = (data) => {
-  USERS[data.username] = data.password;
 }
 
 // function will be called if player connects to server
 var io = require('socket.io')(serv,{});
 io.sockets.on('connection', socket => {
   socket.id = Math.random();
-  SOCKET_LIST[socket.id] = socket;
+  SOCKET_OBJ[socket.id] = socket;
 
   socket.on('signIn', (data) => {
     if (isValidPassword(data)) {
@@ -160,15 +59,15 @@ io.sockets.on('connection', socket => {
   socket.number = String(Math.floor(10 * Math.random()));
 
   socket.on('disconnect', () => {
-    delete SOCKET_LIST[socket.id];
+    delete SOCKET_OBJ[socket.id];
     Player.onDisconnect(socket);
   });
 
   socket.on('sendMessageToServer', (data) => {
     var playerName = ('' + socket.id).slice(2,7);
-    for (var i in SOCKET_LIST) {
-      SOCKET_LIST[i].emit('addToChat', playerName + ': ' + data);
-      console.log("i'm the socket list index", SOCKET_LIST[i])
+    for (var i in SOCKET_OBJ) {
+      SOCKET_OBJ[i].emit('addToChat', playerName + ': ' + data);
+      console.log("i'm the socket list index", SOCKET_OBJ[i])
     }
   });
 
@@ -178,12 +77,12 @@ io.sockets.on('connection', socket => {
 setInterval( () => {
   var package = Player.update();
   
-  for (var i in SOCKET_LIST) {
-    var socket = SOCKET_LIST[i];
+  for (var i in SOCKET_OBJ) {
+    var socket = SOCKET_OBJ[i];
     socket.emit('newPositions', package);
   }
 
-}, 1000/25);
+}, 1000/25)
 
 // view engine setup
 // app.set('views', path.join(__dirname, 'views'));
