@@ -1,21 +1,21 @@
 // entity
-var Entity = () => {
-    var self = {
-      x: 250,
-      y: 250,
-      speedX: 0,
-      speedY: 0,
-      id: ''
+class Entity {
+    constructor() {
+      this.x = 250;
+      this.y = 250;
+      this.speedX = 0;
+      this.speedY = 0;
+      this.id = '';
     }
-    self.update = () => {
+    update() {
       self.updatePosition();
     }
-    self.updatePosition = () => {
+    updatePosition() {
       self.x += self.speedX;
       self.y += self.speedY;
     }
-    return self;
   }
+// now i need to create an instance of entity
   
   // player 
   var Player = (id) => {
