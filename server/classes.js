@@ -8,53 +8,56 @@ class Entity {
       this.id = '';
     }
     update() {
-      self.updatePosition();
+      this.updatePosition();
     }
     updatePosition() {
-      self.x += self.speedX;
-      self.y += self.speedY;
+      this.x += this.speedX;
+      this.y += this.speedY;
     }
   }
 // still need to create an instance of Entity
   
 // player 
 class Player extends Entity {
-  constructor(id) {}
-  self.id = id;
-  self.number = String(Math.floor(10 * Math.random()));
-  self.pressingRight = false;
-  self.pressingLeft = false;
-  self.pressingUp = false;
-  self.pressingDown = false;
-  self.maxSpeed = 5;
+  constructor(id) {
+  this.id = id;
+  this.number = String(Math.floor(10 * Math.random()));
+  this.pressingRight = false;
+  this.pressingLeft = false;
+  this.pressingUp = false;
+  this.pressingDown = false;
+  this.maxSpeed = 5;
 
-  var super_update = self.update;
+  var super_update = this.update;
 
-  self.update = () => {
-      self.updateSpeed();
+  this.update = () => {
+      this.updateSpeed();
       super_update();
 }
-  self.updateSpeed = () => {
-      if (self.pressingRight) {
-          self.speedX += self.maxSpeed;
+  this.updateSpeed = () => {
+      if (this.pressingRight) {
+          this.speedX += this.maxSpeed;
       }
-      else if (self.pressingLeft) {
-          self.speedX -= self.maxSpeed;
+      else if (this.pressingLeft) {
+          this.speedX -= this.maxSpeed;
       } else {
-          self.speedX = 0;
+          this.speedX = 0;
       }
 
-      if (self.pressingUp) {
-          self.speedY -= self.maxSpeed;
+      if (this.pressingUp) {
+          this.speedY -= this.maxSpeed;
       }
-      else if (self.pressingDown) {
-          self.speedY += self.maxSpeed;
+      else if (this.pressingDown) {
+          this.speedY += this.maxSpeed;
       } else {
-          self.speedY = 0;
+          this.speedY = 0;
       }
   }
-  Player.obj[id] = self;
-  return self;
+// formerly, Player.obj[id] = self... back when it wasn't a real class
+// hopefully this properly initiates the instance
+Player.obj[id] = Player();
+// return self;
+}
 }
 
 Player.onConnect = (socket) => {
